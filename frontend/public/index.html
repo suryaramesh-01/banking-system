@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Zinc Bank — Digital Banking</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F3E6;</text></svg>"/>
+<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div class="bg-mesh"></div>
+<div class="bg-grid"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<!-- ===== LOGIN ===== -->
+<div class="page active" id="pg-login">
+  <div class="auth-shell">
+    <div class="auth-left">
+      <div class="brand"><div class="brand-ico">&#x1F3E6;</div><div class="brand-txt">Zinc<span>Bank</span></div></div>
+      <div class="hero-h">Zinc Bank<br>Digital Banking Made Simple.</div>
+      <div class="hero-sub">Secure account access for balance checks, transfers, payments and transaction tracking. Click login to start using the app.</div>
+      <div class="hero-chips">
+        <div class="chip"><span class="chip-dot"></span> Check Balance</div>
+        <div class="chip"><span class="chip-dot"></span> Transfer Funds</div>
+        <div class="chip"><span class="chip-dot"></span> View Transactions</div>
+        <div class="chip"><span class="chip-dot"></span> Manage Profile</div>
+      </div>
+      <div class="hero-actions">
+        <button class="btn btn-gold btn-lg" onclick="App.go('login')">Login</button>
+        <button class="btn btn-outline btn-lg" onclick="App.go('register')">Create Account</button>
+      </div>
+    </div>
+    
+    <div class="auth-right">
+      <div class="auth-box">
+        <div style="font-family:'Syne',sans-serif;font-size:1.55rem;font-weight:700;margin-bottom:5px">Welcome back</div>
+        <div class="muted mb20">Sign in to continue to your Zinc Bank dashboard</div>
+        <form onsubmit="handleLogin(event)">
+          <div class="fg"><label class="flbl">Email Address</label><input id="lg-email" type="email" class="finp" placeholder="you@example.com" required/></div>
+          <div class="fg"><label class="flbl">Password</label><div class="iw"><input id="lg-pwd" type="password" class="finp" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;" required/><button type="button" class="iw-btn" onclick="toggleEye('lg-pwd',this)">&#x1F441;</button></div></div>
+          <div class="flex-b mb16" style="font-size:.8rem"><label style="display:flex;align-items:center;gap:7px;color:var(--s1);cursor:pointer"><input type="checkbox" style="accent-color:var(--gold)"/> Remember me</label><span style="color:var(--gold);cursor:pointer;font-weight:600" onclick="App.go('forgot')">Forgot password?</span></div>
+          <button type="submit" id="lg-btn" class="btn btn-gold btn-full btn-lg">Sign In &#x2192;</button>
+        </form>
+        <div class="tc muted">No account? <span style="color:var(--gold);cursor:pointer;font-weight:600" onclick="App.go('register')">Open one free &#x2192;</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== REGISTER ===== -->
+<div class="page" id="pg-register">
+  <div class="auth-shell">
+    <div class="auth-left">
+      <div class="brand"><div class="brand-ico">&#x1F3E6;</div><div class="brand-txt">Zinc<span>Bank</span></div></div>
+      <div class="hero-h">Open Account<br>In Seconds.</div>
+      <div class="hero-sub">Data stored in MongoDB Atlas, passwords hashed with bcrypt (salt 12), JWT token issued instantly.</div>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div><div class="step-title">Fill your details</div><div class="step-sub">Name, email, phone &amp; DOB</div></div></div>
+        <div class="step"><div class="step-num">2</div><div><div class="step-title">Set a password</div><div class="step-sub">bcrypt hashed before storage</div></div></div>
+        <div class="step"><div class="step-num">3</div><div><div class="step-title">Start banking</div><div class="step-sub">Account number auto-generated</div></div></div>
+      </div>
+    </div>
+    <div class="auth-right" style="align-items:flex-start;padding-top:28px">
+      <div class="auth-box">
+        <div style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;margin-bottom:5px">Create Account</div>
+        <div class="muted mb20">POST /api/v1/auth/register &#x2192; MongoDB Atlas</div>
+        <form onsubmit="handleRegister(event)">
+          <div class="frow">
+            <div class="fg"><label class="flbl">Full Name</label><input id="rg-name" type="text" class="finp" placeholder="Arjun Sharma" required/></div>
+            <div class="fg"><label class="flbl">Date of Birth</label><input id="rg-dob" type="date" class="finp" required/></div>
+          </div>
+          <div class="fg"><label class="flbl">Email Address</label><input id="rg-email" type="email" class="finp" placeholder="you@example.com" required/></div>
+          <div class="frow">
+            <div class="fg"><label class="flbl">Phone</label><input id="rg-phone" type="tel" class="finp" placeholder="9876543210" maxlength="10" required/></div>
+            <div class="fg"><label class="flbl">Account Type</label><select id="rg-acct" class="finp"><option value="Savings">Savings</option><option value="Current">Current</option><option value="Salary">Salary</option></select></div>
+          </div>
+          <div class="fg"><label class="flbl">Password</label><div class="iw"><input id="rg-pwd" type="password" class="finp" placeholder="Min 6 chars" oninput="checkStr(this.value)" required/><button type="button" class="iw-btn" onclick="toggleEye('rg-pwd',this)">&#x1F441;</button></div><div class="strength-bar" id="str-bar"></div><div class="fhint" id="str-txt">Password strength</div></div>
+          <div class="fg"><label class="flbl">Confirm Password</label><input id="rg-conf" type="password" class="finp" placeholder="Re-enter" required/></div>
+          <div class="fg"><label style="display:flex;align-items:flex-start;gap:8px;font-size:.79rem;color:var(--s1);cursor:pointer"><input type="checkbox" required style="accent-color:var(--gold);margin-top:2px;flex-shrink:0"/> I agree to the Terms &amp; Conditions and Privacy Policy</label></div>
+          <button type="submit" id="rg-btn" class="btn btn-gold btn-full btn-lg">Create Account &#x2192;</button>
+        </form>
+        <div class="tc muted mt12">Have an account? <span style="color:var(--gold);cursor:pointer;font-weight:600" onclick="App.go('login')">Sign In</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FORGOT PASSWORD ===== -->
+<div class="page" id="pg-forgot">
+  <div class="auth-shell">
+    <div class="auth-left">
+      <div class="brand"><div class="brand-ico">&#x1F3E6;</div><div class="brand-txt">Zinc<span>Bank</span></div></div>
+      <div class="hero-h">Reset Your<br>Password.</div>
+      <div class="hero-sub">OTP sent via Nodemailer SMTP. Backend stores hashed OTP in MongoDB with 10-min expiry.</div>
+      <div class="demo-box" style="margin-top:32px">
+        <div class="demo-box-t">&#x1F4F1; OTP Flow (Backend)</div>
+        <div class="demo-row">1&#x2192; POST /auth/forgot-password</div>
+        <div class="demo-row">2&#x2192; MongoDB stores OTP + expiry</div>
+        <div class="demo-row">3&#x2192; Nodemailer sends to email</div>
+        <div class="demo-row">4&#x2192; POST /auth/verify-otp</div>
+        <div class="demo-row">5&#x2192; POST /auth/reset-password</div>
+        <div class="demo-row" style="color:var(--gold);margin-top:8px">Demo OTP: 1 2 3 4 5 6</div>
+      </div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-box">
+        <div id="fp-s1">
+          <div style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;margin-bottom:5px">Forgot Password?</div>
+          <div class="muted mb20">Enter your registered email address</div>
+          <form onsubmit="handleFp1(event)">
+            <div class="fg"><label class="flbl">Email Address</label><input id="fp-email" type="email" class="finp" placeholder="you@example.com" required/></div>
+            <button type="submit" id="fp1-btn" class="btn btn-gold btn-full btn-lg">Send OTP &#x2192;</button>
+          </form>
+          <div class="tc muted mt12"><span style="color:var(--gold);cursor:pointer;font-weight:600" onclick="App.go('login')">&#x2190; Back to Login</span></div>
+        </div>
+        <div id="fp-s2" class="hidden">
+          <div style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;margin-bottom:5px">Enter OTP</div>
+          <div class="muted mb8">6-digit code sent to your email</div>
+          <div style="color:var(--gold);font-size:.8rem;margin-bottom:16px">Demo OTP: 1 2 3 4 5 6</div>
+          <form onsubmit="handleFp2(event)">
+            <div class="otp-row">
+              <input class="otp-in" maxlength="1" inputmode="numeric"/>
+              <input class="otp-in" maxlength="1" inputmode="numeric"/>
+              <input class="otp-in" maxlength="1" inputmode="numeric"/>
+              <input class="otp-in" maxlength="1" inputmode="numeric"/>
+              <input class="otp-in" maxlength="1" inputmode="numeric"/>
+              <input class="otp-in" maxlength="1" inputmode="numeric"/>
+            </div>
+            <button type="submit" id="fp2-btn" class="btn btn-gold btn-full btn-lg">Verify OTP &#x2192;</button>
+          </form>
+          <div class="tc muted mt12">Didn't receive? <span style="color:var(--gold);cursor:pointer;font-weight:600" onclick="App.sendOtpAgain()">Resend OTP</span></div>
+        </div>
+        <div id="fp-s3" class="hidden">
+          <div style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;margin-bottom:5px">New Password</div>
+          <div class="muted mb20">POST /auth/reset-password</div>
+          <form onsubmit="handleFp3(event)">
+            <div class="fg"><label class="flbl">New Password</label><div class="iw"><input id="fp-npwd" type="password" class="finp" placeholder="Min 6 chars" required/><button type="button" class="iw-btn" onclick="toggleEye('fp-npwd',this)">&#x1F441;</button></div></div>
+            <div class="fg"><label class="flbl">Confirm Password</label><input id="fp-cpwd" type="password" class="finp" placeholder="Re-enter" required/></div>
+            <button type="submit" id="fp3-btn" class="btn btn-gold btn-full btn-lg">Reset Password &#x2192;</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== USER DASHBOARD ===== -->
+<div class="page" id="pg-dashboard">
+  <nav class="navbar">
+    <div class="nav-brand"><div class="nav-bico">&#x1F3E6;</div><div class="nav-bname">Zinc<span>Bank</span></div></div>
+    <div class="arch-bar" style="font-size:.67rem">
+      <div class="arch-step"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block"></span> Browser</div>
+      <span class="arch-arr">&#x2192;</span><div class="arch-step">Nginx</div>
+      <span class="arch-arr">&#x2192;</span><div class="arch-step">Express API</div>
+      <span class="arch-arr">&#x2192;</span><div class="arch-step">MongoDB Atlas</div>
+      <span class="arch-arr">&#x2192;</span><div class="arch-step">AWS EC2</div>
+    </div>
+    <div class="nav-right">
+      <button class="sync-btn" id="sync-btn" title="Refresh balance" onclick="App.refreshBalance()">&#x1F504;</button>
+      <button class="notif-btn" onclick="App.toggleNotifs()">&#x1F514;<span class="n-badge hidden" id="n-badge">0</span></button>
+      <div class="user-pill" onclick="App.showSec('profile')">
+        <div class="u-av" id="nav-av">A</div>
+        <div><div class="u-name" id="nav-nm">User</div><div class="u-role">Premium Member</div></div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="App.logout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- Notification Panel -->
+  <div class="notif-panel" id="notif-panel">
+    <div class="notif-hd">
+      <div class="notif-hd-t">&#x1F514; Notifications</div>
+      <button class="btn btn-ghost btn-sm" onclick="App.markAllRead()">Mark all read</button>
+    </div>
+    <div class="notif-list" id="notif-list"><div class="tbl-empty">Loading...</div></div>
+  </div>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sb-grp">
+        <div class="sb-lbl">Main</div>
+        <button class="sb-item active" data-sec="home" onclick="App.showSec('home')"><span class="sb-ico">&#x1F3E0;</span> Dashboard</button>
+        <button class="sb-item" data-sec="account" onclick="App.showSec('account')"><span class="sb-ico">&#x1F4B3;</span> My Account</button>
+        <button class="sb-item" data-sec="transactions" onclick="App.showSec('transactions')"><span class="sb-ico">&#x1F4CA;</span> Transactions</button>
+      </div>
+      <div class="sb-grp">
+        <div class="sb-lbl">Banking</div>
+        <button class="sb-item" onclick="App.openModal('mod-deposit')"><span class="sb-ico">&#x1F4B0;</span> Deposit</button>
+        <button class="sb-item" onclick="App.openModal('mod-withdraw')"><span class="sb-ico">&#x1F3E7;</span> Withdraw</button>
+        <button class="sb-item" onclick="App.openModal('mod-transfer')"><span class="sb-ico">&#x26A1;</span> Transfer</button>
+        <button class="sb-item" onclick="App.miniStatement()"><span class="sb-ico">&#x1F4C4;</span> Mini Statement</button>
+      </div>
+      <div class="sb-grp">
+        <div class="sb-lbl">Products</div>
+        <button class="sb-item" data-sec="loans" onclick="App.showSec('loans')"><span class="sb-ico">&#x1F3DB;&#xFE0F;</span> Loans <span class="sb-new">NEW</span></button>
+        <button class="sb-item" data-sec="investments" onclick="App.showSec('investments')"><span class="sb-ico">&#x1F4C8;</span> Investments <span class="sb-new">NEW</span></button>
+      </div>
+      <div class="sb-grp">
+        <div class="sb-lbl">Settings</div>
+        <button class="sb-item" data-sec="profile" onclick="App.showSec('profile')"><span class="sb-ico">&#x1F464;</span> Profile</button>
+        <button class="sb-item" data-sec="security" onclick="App.showSec('security')"><span class="sb-ico">&#x1F512;</span> Security</button>
+      </div>
+      <div class="sb-bottom">
+        <button class="sb-item" onclick="App.logout()"><span class="sb-ico">&#x1F6AA;</span> Sign Out</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <!-- HOME -->
+      <div class="section active" id="sec-home">
+        <div class="sec-hd">
+          <div class="sec-title">Dashboard <span class="tag">LIVE</span></div>
+          <div class="sec-sub">Balance from <strong style="color:var(--gold)">GET /api/v1/accounts/balance</strong> + Summary from <strong style="color:var(--gold)">GET /api/v1/transactions/summary</strong></div>
+        </div>
+
+        <!-- LIVE BALANCE HERO -->
+        <div class="bal-hero">
+          <div class="bal-lbl"><span class="live-dot"></span> Available Balance &mdash; Live from MongoDB Atlas</div>
+          <div class="bal-amt loading" id="bal-amt"></div>
+          <div class="bal-acct">Account: <span class="bal-acct-num" id="bal-acct-num">Loading...</span> <span class="tag" id="bal-acct-type">&#x2014;</span></div>
+          <div class="bal-foot">
+            <div class="bal-stat"><div class="bal-stat-lbl">Monthly Credit</div><div class="bal-stat-val cr" id="bal-cr">&#x2014;</div></div>
+            <div class="bal-stat"><div class="bal-stat-lbl">Monthly Debit</div><div class="bal-stat-val dr" id="bal-dr">&#x2014;</div></div>
+            <div class="bal-stat"><div class="bal-stat-lbl">Transactions</div><div class="bal-stat-val" id="bal-txns">&#x2014;</div></div>
+            <button class="ref-btn" id="ref-btn" onclick="App.refreshBalance()"><span class="ri">&#x1F504;</span> Refresh Balance</button>
+          </div>
+        </div>
+
+        <!-- STAT CARDS -->
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-ico" style="background:var(--goldbg)">&#x1F4B0;</div><div><div class="stat-lbl">Balance</div><div class="stat-val ld" id="st-bal">&#x2014;</div><div class="stat-delta" style="color:var(--green)">&#x2191; Live API</div></div></div>
+          <div class="stat-card"><div class="stat-ico" style="background:var(--greenbg)">&#x1F4C8;</div><div><div class="stat-lbl">Monthly Credits</div><div class="stat-val ld" id="st-cr">&#x2014;</div><div class="stat-delta" style="color:var(--green)">This month</div></div></div>
+          <div class="stat-card"><div class="stat-ico" style="background:var(--redbg)">&#x1F4C9;</div><div><div class="stat-lbl">Monthly Debits</div><div class="stat-val ld" id="st-dr">&#x2014;</div><div class="stat-delta" style="color:var(--red)">This month</div></div></div>
+          <div class="stat-card"><div class="stat-ico" style="background:var(--bluebg)">&#x1F504;</div><div><div class="stat-lbl">Transactions</div><div class="stat-val ld" id="st-txns">&#x2014;</div><div class="stat-delta" style="color:var(--blue)">All time</div></div></div>
+        </div>
+
+        <div class="grid2">
+          <div>
+            <div class="flex-b mb16"><span style="font-family:'Syne',sans-serif;font-weight:700">Your Card</span><span class="tag">VISA DEBIT</span></div>
+            <div class="dcard">
+              <div class="dcard-holo"></div>
+              <div class="dcard-chip"></div>
+              <div class="dcard-num" id="dc-num">&#x2022;&#x2022;&#x2022;&#x2022; &#x2022;&#x2022;&#x2022;&#x2022; &#x2022;&#x2022;&#x2022;&#x2022; &#x2022;&#x2022;&#x2022;&#x2022;</div>
+              <div class="dcard-foot">
+                <div><div class="dc-lbl">Card Holder</div><div class="dc-val" id="dc-name">&#x2014;</div></div>
+                <div><div class="dc-lbl">Expires</div><div class="dc-val">08/29</div></div>
+                <div><div class="dc-lbl">Type</div><div class="dc-val" id="dc-type">&#x2014;</div></div>
+                <div class="dc-logo">NEXA</div>
+              </div>
+            </div>
+            <div class="card mt12" style="padding:14px">
+              <div class="flex-b mb8"><span class="muted small">Monthly Spend Limit</span><span style="font-size:.8rem;font-weight:600">&#x20B9;1,00,000</span></div>
+              <div class="progress"><div class="progress-bar" id="spend-prog" style="width:0%"></div></div>
+              <div class="muted mt8" style="font-size:.68rem" id="spend-pct">Calculating...</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:13px">Quick Actions</div>
+            <div class="qa-grid">
+              <div class="qa-card" onclick="App.openModal('mod-deposit')"><div class="qa-ico" style="background:var(--greenbg)">&#x1F4B0;</div><div class="qa-lbl">Deposit</div></div>
+              <div class="qa-card" onclick="App.openModal('mod-withdraw')"><div class="qa-ico" style="background:var(--redbg)">&#x1F3E7;</div><div class="qa-lbl">Withdraw</div></div>
+              <div class="qa-card" onclick="App.openModal('mod-transfer')"><div class="qa-ico" style="background:var(--bluebg)">&#x26A1;</div><div class="qa-lbl">Transfer</div></div>
+              <div class="qa-card" onclick="App.miniStatement()"><div class="qa-ico" style="background:var(--goldbg)">&#x1F4C4;</div><div class="qa-lbl">Statement</div></div>
+              <div class="qa-card" onclick="App.showSec('loans')"><div class="qa-ico" style="background:var(--purplebg)">&#x1F3DB;&#xFE0F;</div><div class="qa-lbl">Apply Loan</div></div>
+              <div class="qa-card" onclick="App.showSec('account')"><div class="qa-ico" style="background:var(--goldbg)">&#x1F4B3;</div><div class="qa-lbl">Account</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mt20">
+          <div class="card-hd">
+            <div class="card-title">&#x1F4CB; Recent Transactions <span class="muted small" style="font-weight:400">(GET /api/v1/transactions?limit=5)</span></div>
+            <button class="btn btn-ghost btn-sm" onclick="App.showSec('transactions')">View All &#x2192;</button>
+          </div>
+          <div class="tbl-wrap">
+            <table><thead><tr><th>Txn ID</th><th>Date</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody id="home-tbody"><tr><td colspan="5" class="tbl-empty">Loading transactions...</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCOUNT -->
+      <div class="section" id="sec-account">
+        <div class="sec-hd"><div class="sec-title">&#x1F4B3; My Account</div><div class="sec-sub">GET /api/v1/accounts/my &#x2192; MongoDB Atlas</div></div>
+        <div class="grid2">
+          <div>
+            <div class="dcard mb16">
+              <div class="dcard-holo"></div><div class="dcard-chip"></div>
+              <div class="dcard-num" id="ac-num">&#x2022;&#x2022;&#x2022;&#x2022; &#x2022;&#x2022;&#x2022;&#x2022; &#x2022;&#x2022;&#x2022;&#x2022; &#x2022;&#x2022;&#x2022;&#x2022;</div>
+              <div class="dcard-foot"><div><div class="dc-lbl">Card Holder</div><div class="dc-val" id="ac-name2">&#x2014;</div></div><div><div class="dc-lbl">Expires</div><div class="dc-val">08/29</div></div><div class="dc-logo">NEXA</div></div>
+            </div>
+            <div class="acct-box">
+              <div class="info-row"><span class="info-lbl">Account Number</span><span class="info-val" id="ac-acct">&#x2014;</span></div>
+              <div class="info-row"><span class="info-lbl">Account Type</span><span class="info-val" id="ac-type">&#x2014;</span></div>
+              <div class="info-row"><span class="info-lbl">Available Balance</span><span class="info-val cr" id="ac-bal">&#x2014;</span></div>
+              <div class="info-row"><span class="info-lbl">IFSC Code</span><span class="info-val" id="ac-ifsc">&#x2014;</span></div>
+              <div class="info-row"><span class="info-lbl">Branch</span><span class="info-val" id="ac-branch">&#x2014;</span></div>
+              <div class="info-row"><span class="info-lbl">Status</span><span class="info-val" id="ac-status">&#x2014;</span></div>
+              <div class="info-row"><span class="info-lbl">Opened On</span><span class="info-val" id="ac-opened">&#x2014;</span></div>
+              <div class="info-row"><span class="info-lbl">Daily Limit</span><span class="info-val" id="ac-limit">&#x2014;</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="card mb16">
+              <div class="card-title" style="margin-bottom:14px">Account Holder</div>
+              <div class="info-row"><span class="info-lbl">Full Name</span><span class="info-val" id="ac-hname">&#x2014;</span></div>
+              <div class="info-row"><span class="info-lbl">Email</span><span class="info-val" id="ac-email">&#x2014;</span></div>
+              <div class="info-row"><span class="info-lbl">Phone</span><span class="info-val" id="ac-phone">&#x2014;</span></div>
+              <div class="info-row"><span class="info-lbl">KYC Status</span><span class="info-val" id="ac-kyc">&#x2014;</span></div>
+              <div class="info-row"><span class="info-lbl">Last Login</span><span class="info-val" id="ac-login">&#x2014;</span></div>
+            </div>
+            <div class="card">
+              <div class="card-title" style="margin-bottom:14px">Quick Banking</div>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <button class="btn btn-gold btn-full" onclick="App.openModal('mod-deposit')">&#x1F4B0; Deposit Money</button>
+                <button class="btn btn-outline btn-full" onclick="App.openModal('mod-withdraw')">&#x1F3E7; Withdraw Cash</button>
+                <button class="btn btn-ghost btn-full" onclick="App.openModal('mod-transfer')">&#x26A1; Fund Transfer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRANSACTIONS -->
+      <div class="section" id="sec-transactions">
+        <div class="sec-hd"><div class="sec-title">&#x1F4CA; Transactions</div><div class="sec-sub">GET /api/v1/transactions?page=1&amp;limit=15 &#x2192; paginated from MongoDB</div></div>
+        <div class="card mb12" style="padding:13px">
+          <div class="flex-b" style="flex-wrap:wrap;gap:10px">
+            <input type="text" class="finp" id="txn-search" placeholder="&#x1F50D;  Search description or Txn ID..." style="max-width:300px;padding:10px 14px" oninput="App.searchTxns(this.value)"/>
+            <div class="flex-c gap8">
+              <select class="finp" id="txn-filter" style="width:135px;padding:10px 14px" onchange="App.filterTxns(this.value)">
+                <option value="all">All Types</option><option value="credit">Credits</option><option value="debit">Debits</option>
+              </select>
+              <button class="btn btn-ghost btn-sm" onclick="App.exportCSV()">&#x2B07; Export CSV</button>
+              <button class="btn btn-ghost btn-sm" onclick="App.loadTxns()">&#x1F504; Refresh</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table><thead><tr><th>Txn ID</th><th>Date</th><th>Description</th><th>Mode</th><th>Amount</th><th>Balance After</th><th>Status</th></tr></thead>
+            <tbody id="txn-tbody"><tr><td colspan="7" class="tbl-empty">Loading...</td></tr></tbody></table>
+          </div>
+          <div class="flex-b mt14" style="flex-wrap:wrap;gap:10px">
+            <div class="muted small" id="txn-info">&#x2014;</div>
+            <div class="flex-c gap8">
+              <button class="btn btn-ghost btn-sm" id="txn-prev" onclick="App.txnPageNav(-1)" disabled>&#x2190; Prev</button>
+              <span class="muted small" id="txn-pg-num">Page 1</span>
+              <button class="btn btn-ghost btn-sm" id="txn-next" onclick="App.txnPageNav(1)">Next &#x2192;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOANS -->
+      <div class="section" id="sec-loans">
+        <div class="sec-hd"><div class="sec-title">&#x1F3DB;&#xFE0F; Loans</div><div class="sec-sub">POST /api/v1/loans/apply &#x2192; MongoDB Atlas</div></div>
+        <div class="grid3 mb20">
+          <div class="card" style="cursor:pointer;border-color:rgba(201,168,76,.3)" onclick="App.openLoanModal('Personal')">
+            <div style="font-size:1.8rem;margin-bottom:10px">&#x1F464;</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:5px">Personal Loan</div>
+            <div class="muted small mb12">Up to &#x20B9;10,00,000 &bull; 12.5% p.a.</div>
+            <button class="btn btn-outline btn-full btn-sm">Apply Now</button>
+          </div>
+          <div class="card" style="cursor:pointer" onclick="App.openLoanModal('Home')">
+            <div style="font-size:1.8rem;margin-bottom:10px">&#x1F3E0;</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:5px">Home Loan</div>
+            <div class="muted small mb12">Up to &#x20B9;1Cr &bull; 8.5% p.a.</div>
+            <button class="btn btn-ghost btn-full btn-sm">Apply Now</button>
+          </div>
+          <div class="card" style="cursor:pointer" onclick="App.openLoanModal('Vehicle')">
+            <div style="font-size:1.8rem;margin-bottom:10px">&#x1F697;</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:5px">Vehicle Loan</div>
+            <div class="muted small mb12">Up to &#x20B9;25L &bull; 9.5% p.a.</div>
+            <button class="btn btn-ghost btn-full btn-sm">Apply Now</button>
+          </div>
+        </div>
+        <div class="card"><div class="card-title" style="margin-bottom:14px">My Loan Applications</div><div id="loans-list"><div class="tbl-empty">Loading...</div></div></div>
+      </div>
+
+      <!-- INVESTMENTS -->
+      <div class="section" id="sec-investments">
+        <div class="sec-hd"><div class="sec-title">&#x1F4C8; Investments</div><div class="sec-sub">Fixed Deposits, Mutual Funds &mdash; Coming Soon</div></div>
+        <div class="grid2 mb20">
+          <div class="card"><div style="font-size:1.8rem;margin-bottom:9px">&#x1F3E6;</div><div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:4px">Fixed Deposit</div><div class="muted small mb12">7.5% p.a. &bull; Min &#x20B9;10,000 &bull; 1&#x2013;5 years</div><button class="btn btn-outline btn-full btn-sm" onclick="App.showToast('FD module coming soon!','info')">Open FD</button></div>
+          <div class="card"><div style="font-size:1.8rem;margin-bottom:9px">&#x1F4CA;</div><div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:4px">Mutual Funds</div><div class="muted small mb12">SIP from &#x20B9;500/month &bull; SEBI regulated</div><button class="btn btn-ghost btn-full btn-sm" onclick="App.showToast('MF module coming soon!','info')">Invest Now</button></div>
+        </div>
+        <div class="card"><div class="tbl-empty" style="padding:48px">&#x1F680; Investment products launching soon. Check back!</div></div>
+      </div>
+
+      <!-- PROFILE -->
+      <div class="section" id="sec-profile">
+        <div class="sec-hd"><div class="sec-title">&#x1F464; Profile</div><div class="sec-sub">PATCH /api/v1/users/profile &#x2192; MongoDB Atlas</div></div>
+        <div class="grid2">
+          <div class="card">
+            <div class="tc mb20">
+              <div class="prof-av" id="pf-av">A</div>
+              <div style="font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700" id="pf-dname">&#x2014;</div>
+              <div class="muted mt4" id="pf-demail">&#x2014;</div>
+              <div class="tag mt8">Premium Member</div>
+            </div>
+            <div class="divider"></div>
+            <form onsubmit="handleUpdateProfile(event)">
+              <div class="fg"><label class="flbl">Full Name</label><input id="pf-name" type="text" class="finp"/></div>
+              <div class="fg"><label class="flbl">Email (read-only)</label><input id="pf-email" type="email" class="finp" readonly style="opacity:.5"/></div>
+              <div class="frow">
+                <div class="fg"><label class="flbl">Phone</label><input id="pf-phone" type="tel" class="finp"/></div>
+                <div class="fg"><label class="flbl">Date of Birth</label><input id="pf-dob" type="date" class="finp"/></div>
+              </div>
+              <div class="fg"><label class="flbl">Address</label><textarea id="pf-address" class="finp" rows="3" placeholder="Your full address"></textarea></div>
+              <button type="submit" id="pf-btn" class="btn btn-gold btn-full">Save Changes</button>
+            </form>
+          </div>
+          <div>
+            <div class="card mb16">
+              <div class="card-title" style="margin-bottom:14px">&#x1F511; Change Password</div>
+              <form onsubmit="handleChangePwd(event)">
+                <div class="fg"><label class="flbl">Current Password</label><div class="iw"><input id="cp-cur" type="password" class="finp" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"/><button type="button" class="iw-btn" onclick="toggleEye('cp-cur',this)">&#x1F441;</button></div></div>
+                <div class="fg"><label class="flbl">New Password</label><div class="iw"><input id="cp-new" type="password" class="finp" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"/><button type="button" class="iw-btn" onclick="toggleEye('cp-new',this)">&#x1F441;</button></div></div>
+                <div class="fg"><label class="flbl">Confirm New Password</label><input id="cp-conf" type="password" class="finp" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"/></div>
+                <button type="submit" id="cp-btn" class="btn btn-outline btn-full">Update Password</button>
+              </form>
+            </div>
+            <div class="card">
+              <div class="card-title" style="margin-bottom:10px">&#x1F522; Transaction PIN</div>
+              <div class="alert al-w mb12">PIN required for all withdrawals &amp; transfers (POST /accounts/set-pin)</div>
+              <form onsubmit="handleChangePin(event)">
+                <div class="fg"><label class="flbl">Current PIN</label><input id="pin-cur" type="password" class="finp" maxlength="4" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;" inputmode="numeric"/></div>
+                <div class="frow">
+                  <div class="fg"><label class="flbl">New PIN</label><input id="pin-new" type="password" class="finp" maxlength="4" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;" inputmode="numeric"/></div>
+                  <div class="fg"><label class="flbl">Confirm PIN</label><input id="pin-conf" type="password" class="finp" maxlength="4" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;" inputmode="numeric"/></div>
+                </div>
+                <button type="submit" id="pin-btn" class="btn btn-ghost btn-full">Change Transaction PIN</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECURITY -->
+      <div class="section" id="sec-security">
+        <div class="sec-hd"><div class="sec-title">&#x1F512; Security</div><div class="sec-sub">Security features, active sessions &amp; cloud architecture</div></div>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:14px">Security Features</div>
+            <div class="sec-row"><div class="flex-c gap12"><div class="sec-ico" style="background:var(--greenbg)">&#x1F510;</div><div><div style="font-weight:600;font-size:.85rem">bcrypt Password Hash</div><div class="muted">Salt rounds: 12 &mdash; Node.js bcryptjs</div></div></div><span class="badge bg-green">Active</span></div>
+            <div class="sec-row"><div class="flex-c gap12"><div class="sec-ico" style="background:var(--bluebg)">&#x1F39F;&#xFE0F;</div><div><div style="font-weight:600;font-size:.85rem">JWT Auth Tokens</div><div class="muted">Access: 15m &bull; Refresh: 7d</div></div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+            <div class="sec-row"><div class="flex-c gap12"><div class="sec-ico" style="background:var(--goldbg)">&#x1F4F1;</div><div><div style="font-weight:600;font-size:.85rem">OTP Verification</div><div class="muted">Nodemailer SMTP &bull; 10 min expiry</div></div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+            <div class="sec-row"><div class="flex-c gap12"><div class="sec-ico" style="background:var(--redbg)">&#x1F6E1;&#xFE0F;</div><div><div style="font-weight:600;font-size:.85rem">Rate Limiting</div><div class="muted">100 req/15min &bull; 10 auth attempts</div></div></div><span class="badge bg-green">Active</span></div>
+            <div class="sec-row"><div class="flex-c gap12"><div class="sec-ico" style="background:var(--purplebg)">&#x1F522;</div><div><div style="font-weight:600;font-size:.85rem">Transaction PIN</div><div class="muted">bcrypt hashed in MongoDB</div></div></div><span class="badge bg-green">Enabled</span></div>
+            <div class="sec-row"><div class="flex-c gap12"><div class="sec-ico" style="background:rgba(245,158,11,.13)">&#x1FA96;</div><div><div style="font-weight:600;font-size:.85rem">Helmet.js Security</div><div class="muted">XSS, CSRF, clickjacking headers</div></div></div><span class="badge bg-green">Active</span></div>
+          </div>
+          <div>
+            <div class="card mb16">
+              <div class="card-title" style="margin-bottom:14px">&#x1F30D; Cloud Architecture</div>
+              <div class="info-row"><span class="info-lbl">Frontend</span><span class="info-val">HTML/CSS/JS + Nginx</span></div>
+              <div class="info-row"><span class="info-lbl">Backend</span><span class="info-val">Node.js + Express.js</span></div>
+              <div class="info-row"><span class="info-lbl">Database</span><span class="info-val">MongoDB Atlas Cloud</span></div>
+              <div class="info-row"><span class="info-lbl">Hosting</span><span class="info-val">AWS EC2 + Nginx</span></div>
+              <div class="info-row"><span class="info-lbl">Container</span><span class="info-val">Docker + Compose</span></div>
+              <div class="info-row"><span class="info-lbl">Auth</span><span class="info-val">JWT + bcrypt + OTP</span></div>
+              <div class="info-row"><span class="info-lbl">Email</span><span class="info-val">Nodemailer SMTP</span></div>
+            </div>
+            <div class="card">
+              <div class="card-title" style="margin-bottom:14px">&#x1F4BB; Active Sessions</div>
+              <div style="padding:11px;background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);border-radius:10px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                <div class="flex-c gap10"><span style="font-size:1.1rem">&#x1F4BB;</span><div><div style="font-size:.83rem;font-weight:600">Current Session</div><div class="muted" style="font-size:.7rem">Chrome &mdash; Just now</div></div></div>
+                <span class="badge bg-green">Active</span>
+              </div>
+              <div class="divider"></div>
+              <button class="btn btn-danger btn-full btn-sm" onclick="App.logout()">&#x1F6AA; Sign Out All Sessions</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ===== ADMIN PANEL ===== -->
+<div class="page" id="pg-admin">
+  <nav class="navbar">
+    <div class="nav-brand"><div class="nav-bico">&#x1F3E6;</div><div class="nav-bname">Zinc<span>Bank</span> <span class="tag" style="font-size:.6rem;margin-left:6px">ADMIN</span></div></div>
+    <div class="nav-right">
+      <div class="user-pill"><div class="u-av">A</div><div><div class="u-name">Admin Manager</div><div class="u-role">Super Admin</div></div></div>
+      <button class="btn btn-danger btn-sm" onclick="App.logout()">Sign Out</button>
+    </div>
+  </nav>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sb-grp">
+        <div class="sb-lbl">Admin Panel</div>
+        <button class="sb-item" onclick="App.admTab('overview')"><span class="sb-ico">&#x1F4CA;</span> Overview</button>
+        <button class="sb-item" onclick="App.admTab('users')"><span class="sb-ico">&#x1F465;</span> All Users</button>
+        <button class="sb-item" onclick="App.admTab('transactions')"><span class="sb-ico">&#x1F4B8;</span> Transactions</button>
+        <button class="sb-item" onclick="App.admTab('reports')"><span class="sb-ico">&#x1F4C8;</span> Reports</button>
+      </div>
+      <div class="sb-bottom"><button class="sb-item" onclick="App.logout()"><span class="sb-ico">&#x1F6AA;</span> Logout</button></div>
+    </aside>
+    <main class="main">
+
+      <!-- ADMIN OVERVIEW -->
+      <div class="adm-content" id="admt-overview">
+        <div class="sec-hd"><div class="sec-title">Admin Dashboard</div><div class="sec-sub">GET /api/v1/admin/dashboard &#x2192; MongoDB Atlas</div></div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-ico" style="background:var(--bluebg)">&#x1F465;</div><div><div class="stat-lbl">Total Users</div><div class="stat-val" id="adm-total">&#x2014;</div><div class="stat-delta" style="color:var(--blue)">Registered</div></div></div>
+          <div class="stat-card"><div class="stat-ico" style="background:var(--greenbg)">&#x2705;</div><div><div class="stat-lbl">Active</div><div class="stat-val" id="adm-active">&#x2014;</div><div class="stat-delta" style="color:var(--green)">Active accounts</div></div></div>
+          <div class="stat-card"><div class="stat-ico" style="background:var(--redbg)">&#x1F6AB;</div><div><div class="stat-lbl">Blocked</div><div class="stat-val" id="adm-blocked">&#x2014;</div><div class="stat-delta" style="color:var(--red)">Blocked accounts</div></div></div>
+          <div class="stat-card"><div class="stat-ico" style="background:var(--goldbg)">&#x1F4B0;</div><div><div class="stat-lbl">Total Funds</div><div class="stat-val" id="adm-funds" style="font-size:1rem">&#x2014;</div><div class="stat-delta" style="color:var(--gold)">Under management</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px">&#x1F4CB; Recent System Transactions</div>
+          <div class="tbl-wrap"><table><thead><tr><th>Txn ID</th><th>User</th><th>Description</th><th>Amount</th><th>Type</th><th>Date</th></tr></thead>
+          <tbody id="adm-recent-tbody"><tr><td colspan="6" class="tbl-empty">Loading...</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ADMIN USERS -->
+      <div class="adm-content hidden" id="admt-users">
+        <div class="sec-hd"><div class="sec-title">&#x1F465; All Users</div><div class="sec-sub">PATCH /api/v1/admin/users/:id/block to block/unblock</div></div>
+        <div class="card mb12" style="padding:13px">
+          <div class="flex-b gap12" style="flex-wrap:wrap">
+            <input type="text" class="finp" placeholder="&#x1F50D;  Search users..." style="max-width:280px;padding:10px 14px" oninput="App.loadAdmUsers(this.value)"/>
+            <select class="finp" style="width:130px;padding:10px 14px" onchange="App.loadAdmUsers('',this.value)"><option value="all">All Status</option><option value="active">Active</option><option value="blocked">Blocked</option></select>
+          </div>
+        </div>
+        <div class="card"><div class="tbl-wrap"><table><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="adm-users-tbody"><tr><td colspan="6" class="tbl-empty">Loading...</td></tr></tbody></table></div></div>
+      </div>
+
+      <!-- ADMIN TRANSACTIONS -->
+      <div class="adm-content hidden" id="admt-transactions">
+        <div class="sec-hd"><div class="sec-title">&#x1F4B8; All Transactions</div><div class="sec-sub">GET /api/v1/admin/transactions &#x2192; system-wide</div></div>
+        <div class="card mb12" style="padding:13px">
+          <input type="text" class="finp" placeholder="&#x1F50D;  Search transactions..." style="max-width:300px;padding:10px 14px" oninput="App.loadAdmTxns(this.value)"/>
+        </div>
+        <div class="card"><div class="tbl-wrap"><table><thead><tr><th>Txn ID</th><th>User</th><th>Date</th><th>Description</th><th>Amount</th><th>Type</th></tr></thead>
+        <tbody id="adm-txns-tbody"><tr><td colspan="6" class="tbl-empty">Loading...</td></tr></tbody></table></div></div>
+      </div>
+
+      <!-- ADMIN REPORTS -->
+      <div class="adm-content hidden" id="admt-reports">
+        <div class="sec-hd"><div class="sec-title">&#x1F4C8; Reports</div><div class="sec-sub">GET /api/v1/admin/reports/summary &#x2192; MongoDB aggregations</div></div>
+        <div class="grid3">
+          <div class="card" style="cursor:pointer" onclick="App.admReport('users')"><div style="font-size:1.8rem;margin-bottom:9px">&#x1F465;</div><div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:4px">User Report</div><div class="muted small mb12">All users &amp; accounts</div><button class="btn btn-gold btn-full btn-sm">Generate</button></div>
+          <div class="card" style="cursor:pointer" onclick="App.admReport('transactions')"><div style="font-size:1.8rem;margin-bottom:9px">&#x1F4B8;</div><div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:4px">Transaction Report</div><div class="muted small mb12">All system transactions</div><button class="btn btn-gold btn-full btn-sm">Generate</button></div>
+          <div class="card" style="cursor:pointer" onclick="App.admReport('funds')"><div style="font-size:1.8rem;margin-bottom:9px">&#x1F4B0;</div><div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:4px">Funds Report</div><div class="muted small mb12">Total funds managed</div><button class="btn btn-gold btn-full btn-sm">Generate</button></div>
+        </div>
+        <div class="card mt20 hidden" id="adm-report-out"></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+<!-- Deposit -->
+<div class="overlay" id="mod-deposit">
+  <div class="modal">
+    <div class="modal-hd"><div class="modal-title">&#x1F4B0; Deposit Money <span class="muted small" style="font-weight:400">POST /transactions/deposit</span></div><button class="mclose" onclick="App.closeModal('mod-deposit')">&#x2715;</button></div>
+    <form onsubmit="handleDeposit(event)">
+      <div class="fg"><label class="flbl">Amount (&#x20B9;)</label><input id="dp-amt" type="number" class="finp" placeholder="e.g. 5000" min="1" required/></div>
+      <div class="fg"><label class="flbl">Deposit Mode</label><select id="dp-mode" class="finp"><option value="CASH">Cash Deposit</option><option value="NEFT">NEFT</option><option value="CHEQUE">Cheque</option><option value="RTGS">RTGS</option></select></div>
+      <div class="fg"><label class="flbl">Description (optional)</label><input id="dp-desc" type="text" class="finp" placeholder="e.g. Salary credit"/></div>
+      <div class="flex-c gap12"><button type="button" class="btn btn-ghost w100" onclick="App.closeModal('mod-deposit')">Cancel</button><button type="submit" id="dp-btn" class="btn btn-gold w100">Deposit &#x2192;</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- Withdraw -->
+<div class="overlay" id="mod-withdraw">
+  <div class="modal">
+    <div class="modal-hd"><div class="modal-title">&#x1F3E7; Withdraw Cash <span class="muted small" style="font-weight:400">POST /transactions/withdraw</span></div><button class="mclose" onclick="App.closeModal('mod-withdraw')">&#x2715;</button></div>
+    <form onsubmit="handleWithdraw(event)">
+      <div class="fg"><label class="flbl">Amount (&#x20B9;)</label><input id="wd-amt" type="number" class="finp" placeholder="e.g. 2000" min="1" required/></div>
+      <div class="fg"><label class="flbl">Withdraw Mode</label><select id="wd-mode" class="finp"><option value="ATM">ATM</option><option value="CASH">Branch Cash</option><option value="UPI">UPI</option></select></div>
+      <div class="fg"><label class="flbl">Description (optional)</label><input id="wd-desc" type="text" class="finp" placeholder="e.g. ATM withdrawal"/></div>
+      <div class="fg"><label class="flbl">Transaction PIN &#x1F512;</label><input id="wd-pin" type="password" class="finp" maxlength="4" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;" inputmode="numeric" required/><div class="fhint">Demo PIN: 4521 &mdash; sent to POST /transactions/withdraw</div></div>
+      <div class="flex-c gap12"><button type="button" class="btn btn-ghost w100" onclick="App.closeModal('mod-withdraw')">Cancel</button><button type="submit" id="wd-btn" class="btn btn-gold w100">Withdraw &#x2192;</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- Transfer -->
+<div class="overlay" id="mod-transfer">
+  <div class="modal">
+    <div class="modal-hd"><div class="modal-title">&#x26A1; Fund Transfer <span class="muted small" style="font-weight:400">POST /transactions/transfer</span></div><button class="mclose" onclick="App.closeModal('mod-transfer')">&#x2715;</button></div>
+    <div class="alert al-i mb14">&#x1F4A1; Try account: <strong>7834 2210 5643 8821</strong> (Priya Patel)</div>
+    <form onsubmit="handleTransfer(event)">
+      <div class="fg"><label class="flbl">Beneficiary Account Number</label><input id="tf-acct" type="text" class="finp" placeholder="XXXX XXXX XXXX XXXX" required/></div>
+      <div class="fg"><label class="flbl">Transfer Mode</label><select id="tf-mode" class="finp"><option value="IMPS">IMPS (Instant)</option><option value="NEFT">NEFT</option><option value="RTGS">RTGS</option><option value="UPI">UPI</option></select></div>
+      <div class="fg"><label class="flbl">Amount (&#x20B9;)</label><input id="tf-amt" type="number" class="finp" placeholder="e.g. 1000" min="1" required/></div>
+      <div class="fg"><label class="flbl">Remarks (optional)</label><input id="tf-desc" type="text" class="finp" placeholder="e.g. Rent payment"/></div>
+      <div class="fg"><label class="flbl">Transaction PIN &#x1F512;</label><input id="tf-pin" type="password" class="finp" maxlength="4" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;" inputmode="numeric" required/><div class="fhint">Demo PIN: 4521</div></div>
+      <div class="flex-c gap12"><button type="button" class="btn btn-ghost w100" onclick="App.closeModal('mod-transfer')">Cancel</button><button type="submit" id="tf-btn" class="btn btn-gold w100">Transfer &#x2192;</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- Mini Statement -->
+<div class="overlay" id="mod-mini">
+  <div class="modal">
+    <div class="modal-hd"><div class="modal-title">&#x1F4C4; Mini Statement <span class="muted small" style="font-weight:400">GET /accounts/mini-statement</span></div><button class="mclose" onclick="App.closeModal('mod-mini')">&#x2715;</button></div>
+    <div class="acct-box mb14">
+      <div class="flex-b"><div><div class="muted small">Available Balance (Live)</div><div style="font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:var(--green)" id="mini-bal">Loading...</div></div><div style="font-size:2.2rem">&#x1F4B3;</div></div>
+    </div>
+    <div style="font-weight:600;font-size:.83rem;margin-bottom:10px">Last 5 Transactions</div>
+    <div id="mini-list"><div class="tbl-empty">Loading...</div></div>
+    <button class="btn btn-ghost btn-full mt14" onclick="App.closeModal('mod-mini');App.showSec('transactions')">View All Transactions &#x2192;</button>
+  </div>
+</div>
+
+<!-- Loan Apply -->
+<div class="overlay" id="mod-loan">
+  <div class="modal">
+    <div class="modal-hd"><div class="modal-title">&#x1F3DB;&#xFE0F; Apply for Loan <span class="muted small" style="font-weight:400">POST /loans/apply</span></div><button class="mclose" onclick="App.closeModal('mod-loan')">&#x2715;</button></div>
+    <form onsubmit="handleLoan(event)">
+      <div class="fg"><label class="flbl">Loan Type</label><select id="ln-type" class="finp"><option value="Personal">Personal Loan &mdash; 12.5%</option><option value="Home">Home Loan &mdash; 8.5%</option><option value="Vehicle">Vehicle Loan &mdash; 9.5%</option><option value="Education">Education Loan &mdash; 7.0%</option><option value="Business">Business Loan &mdash; 14.0%</option></select></div>
+      <div class="frow">
+        <div class="fg"><label class="flbl">Amount (&#x20B9;)</label><input id="ln-amt" type="number" class="finp" placeholder="e.g. 500000" min="10000" required/></div>
+        <div class="fg"><label class="flbl">Tenure (months)</label><input id="ln-tenure" type="number" class="finp" placeholder="e.g. 24" min="6" max="360" required/></div>
+      </div>
+      <div class="fg"><label class="flbl">Purpose</label><textarea id="ln-purpose" class="finp" rows="2" placeholder="Describe loan purpose"></textarea></div>
+      <div class="alert al-w" id="emi-preview">Enter amount &amp; tenure to preview EMI</div>
+      <div class="flex-c gap12"><button type="button" class="btn btn-ghost w100" onclick="App.closeModal('mod-loan')">Cancel</button><button type="submit" id="ln-btn" class="btn btn-gold w100">Submit Application &#x2192;</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- View User (Admin) -->
+<div class="overlay" id="mod-user-view">
+  <div class="modal modal-lg">
+    <div class="modal-hd"><div class="modal-title">&#x1F464; User Details</div><button class="mclose" onclick="App.closeModal('mod-user-view')">&#x2715;</button></div>
+    <div id="mod-user-body"></div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

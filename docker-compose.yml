@@ -1,0 +1,125 @@
+# ══════════════════════════════════════════════════════════
+#  NexaBank — Docker Compose (Full Stack)
+#  Services: frontend, backend, mongo (dev), nginx
+#
+#  Usage:
+#    Development:  docker-compose up --build
+#    Production:   docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# ══════════════════════════════════════════════════════════
+
+version: '3.9'
+
+services:
+
+  # ── Frontend (Nginx + Static HTML) ──
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nexabank_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - nexabank_net
+    labels:
+      - "com.nexabank.service=frontend"
+      - "com.nexabank.version=2.0.0"
+
+  # ── Backend (Node.js + Express) ──
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nexabank_backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JWT_EXPIRE=${JWT_EXPIRE:-15m}
+      - JWT_REFRESH_EXPIRE=${JWT_REFRESH_EXPIRE:-7d}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT:-587}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost}
+    volumes:
+      - backend_logs:/app/logs
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - nexabank_net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - "com.nexabank.service=backend"
+
+  # ── MongoDB (local dev only — use Atlas in production) ──
+  mongo:
+    image: mongo:7.0
+    container_name: nexabank_mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-nexabank}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS:-nexabank_secret}
+      MONGO_INITDB_DATABASE: nexabank
+    volumes:
+      - mongo_data:/data/db
+      - ./docker/mongo-init.js:/docker-entrypoint-initdb.d/init.js:ro
+    networks:
+      - nexabank_net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    labels:
+      - "com.nexabank.service=database"
+
+  # ── Mongo Express (Dev UI) ──
+  mongo-express:
+    image: mongo-express:latest
+    container_name: nexabank_mongo_ui
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER:-nexabank}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASS:-nexabank_secret}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USER:-nexabank}:${MONGO_PASS:-nexabank_secret}@mongo:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: nexabank_admin
+    depends_on:
+      - mongo
+    networks:
+      - nexabank_net
+    profiles:
+      - dev     # Only start with: docker-compose --profile dev up
+
+# ── Networks ──
+networks:
+  nexabank_net:
+    driver: bridge
+    name: nexabank_network
+
+# ── Volumes ──
+volumes:
+  mongo_data:
+    name: nexabank_mongo_data
+  backend_logs:
+    name: nexabank_backend_logs

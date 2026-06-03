@@ -1,0 +1,5 @@
+2026-05-31 11:07:28 [info]: 🏦 NexaBank API running on port 5000 [development]
+2026-05-31 11:07:28 [info]: ✅ MongoDB Atlas connected: 127.0.0.1
+2026-05-31 11:09:41 [info]: ::1 - - [31/May/2026:05:39:41 +0000] "GET / HTTP/1.1" 404 47 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
+2026-05-31 11:09:42 [info]: ::1 - - [31/May/2026:05:39:42 +0000] "GET /favicon.ico HTTP/1.1" 404 58 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
+2026-05-31 11:10:19 [info]: ::1 - - [31/May/2026:05:40:19 +0000] "GET / HTTP/1.1" 404 47 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
