@@ -37,6 +37,7 @@
         <div style="font-family:'Syne',sans-serif;font-size:1.55rem;font-weight:700;margin-bottom:5px">Welcome back</div>
         <div class="muted mb20">Sign in to continue to your Zinc Bank dashboard</div>
         <form onsubmit="handleLogin(event)">
+          <div id="lg-error" class="alert al-w mb12 hidden"></div>
           <div class="fg"><label class="flbl">Email Address</label><input id="lg-email" type="email" class="finp" placeholder="you@example.com" required/></div>
           <div class="fg"><label class="flbl">Password</label><div class="iw"><input id="lg-pwd" type="password" class="finp" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;" required/><button type="button" class="iw-btn" onclick="toggleEye('lg-pwd',this)">&#x1F441;</button></div></div>
           <div class="flex-b mb16" style="font-size:.8rem"><label style="display:flex;align-items:center;gap:7px;color:var(--s1);cursor:pointer"><input type="checkbox" style="accent-color:var(--gold)"/> Remember me</label><span style="color:var(--gold);cursor:pointer;font-weight:600" onclick="App.go('forgot')">Forgot password?</span></div>
@@ -640,6 +641,8 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script src="js/api.js"></script>
+<script src="js/demoAuth.js"></script>
+<script src="js/loginUtils.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
