@@ -19,7 +19,7 @@ const MOCK = {
     { txnId:'TXN00007', createdAt:'2024-01-03T12:00:00Z', description:'Refund from Flipkart', type:'credit', amount:1299, balanceAfter:57950.00, mode:'AUTO', status:'success' },
     { txnId:'TXN00008', createdAt:'2024-01-01T09:00:00Z', description:'FD Maturity Credit', type:'credit', amount:15000, balanceAfter:56651.00, mode:'AUTO', status:'success' },
   ],
-  admin: { _id:'ADM001', name:'Admin Manager', email:'admin@zincbank.com', role:'admin' },
+  admin: { _id:'ADM001', name:'Admin Manager', email:'admin@nexabank.com', role:'admin' },
   admDash: { totalUsers:3, activeUsers:2, blockedUsers:1, totalFunds:383900.50, totalTxns:11,
     recentTxns:[
       { txnId:'TXN00001', user:{name:'Arjun Sharma'}, createdAt:'2024-01-15T10:30:00Z', description:'Salary Credit', amount:85000, type:'credit' },
@@ -52,6 +52,12 @@ const App = (() => {
   const fmtDT = d => new Date(d).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
   const setTxt = (id,v) => { const e=$(id); if(e) e.textContent = (v===null||v===undefined)?'—':v; };
   const setVal = (id,v) => { const e=$(id); if(e) e.value = v||''; };
+  const setLoginError = (msg='') => {
+    const el=$('lg-error');
+    if(!el) return;
+    el.textContent = msg;
+    el.classList.toggle('hidden', !msg);
+  };
   const genId = () => 'TXN' + Date.now().toString(36).toUpperCase().slice(-8);
 
   function showToast(msg, type='success') {
@@ -99,28 +105,44 @@ const App = (() => {
   /* ── AUTH ── */
   async function login(email, pwd) {
     setBtnLd('lg-btn', true);
+    setLoginError('');
     try {
       let user;
       try {
         const res = await Api.auth.login({ email, password: pwd });
-        user = res.user;
-        TokenStore.set(res.token);
-        if(res.refreshToken) TokenStore.setRefresh(res.refreshToken);
+        user = res.user || res.data?.user;
+        const token = res.token || res.data?.token;
+        if (token) TokenStore.set(token);
+        if (res.refreshToken || res.data?.refreshToken) TokenStore.setRefresh(res.refreshToken || res.data?.refreshToken);
       } catch(err) {
-        // Mock fallback
-        if(email==='admin@zincbank.com' && pwd==='Admin@123') user = MOCK.admin;
-        else if(email==='arjun@example.com' && pwd==='User@123') user = MOCK.user;
-        else if(email==='priya@example.com' && pwd==='User@123') user = {...MOCK.user, name:'Priya Patel', email:'priya@example.com', _id:'USR002'};
-        else { showToast('Invalid email or password','error'); return; }
+        const isConnectionError = /failed to fetch|network|connect/i.test(err?.message || '');
+        const demoUser = typeof window.resolveDemoUser === 'function'
+          ? window.resolveDemoUser(email, pwd)
+          : null;
+        const fallbackUser = isConnectionError && typeof window.createDemoFallbackUser === 'function'
+          ? window.createDemoFallbackUser(email)
+          : null;
+
+        if (demoUser || fallbackUser) {
+          user = demoUser || fallbackUser;
+        } else {
+          const message = typeof window.getLoginErrorMessage === 'function'
+            ? window.getLoginErrorMessage(err)
+            : (err?.message || 'Invalid email or password');
+          setLoginError(message);
+          showToast(message, 'error');
+          return;
+        }
       }
       S.user = user; S.isAdmin = user.role==='admin';
+      setLoginError('');
       if(S.isAdmin) { go('admin'); await renderAdmin(); }
       else { go('dashboard'); await renderDashboard(); }
     } finally { setBtnLd('lg-btn', false); }
   }
 
   function demoLogin(role) {
-    $('lg-email').value = role==='admin' ? 'admin@zincbank.com' : 'arjun@example.com';
+    $('lg-email').value = role==='admin' ? 'admin@nexabank.com' : 'arjun@example.com';
     $('lg-pwd').value = role==='admin' ? 'Admin@123' : 'User@123';
     login($('lg-email').value, $('lg-pwd').value);
   }
@@ -688,6 +710,8 @@ const App = (() => {
       const panel=$('notif-panel'), btn=document.querySelector('.notif-btn');
       if(panel?.classList.contains('open')&&!panel.contains(e.target)&&!btn?.contains(e.target)) panel.classList.remove('open');
     });
+    // Clear login error while the user types
+    ['lg-email','lg-pwd'].forEach(id=>$(id)?.addEventListener('input',()=>setLoginError('')));
     // EMI live calc
     ['ln-amt','ln-tenure','ln-type'].forEach(id=>$(id)?.addEventListener('input',updateEmiPreview));
     // Token expiry
