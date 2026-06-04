@@ -1,4 +1,13 @@
-# ══════════════════════════════════════
+FROM nginx:alpine
+
+RUN rm -rf /usr/share/nginx/html/*
+
+# 👇 THIS IS WHERE YOUR LINE GOES
+COPY public/ /usr/share/nginx/html/
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+CMD ["nginx", "-g", "daemon off;"]# ══════════════════════════════════════
 #  NexaBank Frontend — Dockerfile
 #  Static files served via Nginx
 # ══════════════════════════════════════
